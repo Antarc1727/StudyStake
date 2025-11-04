@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<head>
+  <title>Payment | StudyStake</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Poppins", sans-serif;
+    }
+
+    body {
+      background: linear-gradient(120deg, #FFD93D, #FFB100);
+      color: #333;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      font-weight: 500;
+    }
+
+    header {
+      background: #fff;
+      padding: 20px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-radius: 0 0 20px 20px;
+    }
+
+    header h1 {
+      font-size: 28px;
+      color: #FFB100;
+      font-weight: 700;
+    }
+
+    header a {
+      background-color: #333;
+      color: #fff;
+      text-decoration: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: 0.3s;
+    }
+
+    header a:hover {
+      background-color: #555;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 50px auto;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+      padding: 30px 40px;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 25px;
+      color: #333;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    label {
+      font-weight: 500;
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: 2px solid #FFD93D;
+      outline: none;
+      transition: 0.3s;
+      font-size: 15px;
+    }
+
+    input:focus, select:focus {
+      border-color: #ffcc00;
+      background-color: #fffce0;
+    }
+
+    button {
+      background-color: #FFD93D;
+      color: #333;
+      border: none;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: 0.3s;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      background-color: #ffcc00;
+    }
+
+    .upload {
+      border: 2px dashed #FFD93D;
+      border-radius: 8px;
+      padding: 20px;
+      text-align: center;
+      color: #777;
+    }
+
+    .back-link {
+      text-align: center;
+      margin-top: 15px;
+    }
+
+    .back-link a {
+      color: #333;
+      text-decoration: underline;
+      font-size: 14px;
+    }
+
+    .back-link a:hover {
+      color: #ffb703;
+    }
+
+    /* Responsive */
+    @media (max-width: 720px) {
+      .container {
+        padding: 20px;
+      }
+      h2 {
+        font-size: 2rem;
+      }
+      label, input, select {
+        font-size: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>StudyStake</h1>
+    <a href="dashboard.html">Back to Dashboard</a>
+  </header>
+
+  <div class="container">
+    <h2>💳 Complete Your Payment</h2>
+
+    <form action="dashboard.html" method="POST">
+      <div>
+        <label for="amount">Amount to Pay (₱)</label>
+        <input type="number" id="amount" name="amount" value="500" readonly>
+      </div>
+
+      <div>
+        <label for="method">Payment Method</label>
+        <select id="method" name="method" required>
+          <option value="">-- Select Payment Method --</option>
+          <option value="gcash">GCash</option>
+          <option value="maya">Maya</option>
+          <option value="paypal">PayPal</option>
+          <option value="card">Credit / Debit Card</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Upload Proof of Payment</label>
+        <div class="upload">
+          <input type="file" name="receipt" accept="image/*" required>
+        </div>
+      </div>
+
+      <button type="submit">Confirm Payment</button>
+    </form>
+
+    <div class="back-link">
+      <a href="set_target.html">Cancel and go back</a>
+    </div>
+  </div>
+</body>
+</html>
