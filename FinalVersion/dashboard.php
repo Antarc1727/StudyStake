@@ -321,10 +321,6 @@ $stmt_targets->close();
 
                 <button type="submit">Save Target</button>
             </form>
-
-            <div class="back-link">
-                <a href="dashboard.html">Cancel and go back</a>
-            </div>
         </div>
 
         <div class="container">
@@ -345,6 +341,11 @@ $stmt_targets->close();
                 <div>
                     <label for="achieved-grade">Enter Achieved Grade</label>
                     <input type="number" id="achieved-grade" name="achieved_grade" placeholder="e.g., 85" min="0" max="100" required>
+                </div>
+                
+                <div>
+                    <label>Upload image of grades</label>
+                    <input type="file" name="grade_proof" accept="image/*" required>
                 </div>
 
                 <button type="submit">Submit</button>
