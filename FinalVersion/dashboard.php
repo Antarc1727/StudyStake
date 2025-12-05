@@ -1,24 +1,18 @@
 <?php
 ob_start();
-
 session_start();
 include 'db_connect.php';
-
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
-
 if (!isset($_SESSION['user_id'])) {
     header("Location: index.html");
     exit();
 }
-
 $user_id = (int) $_SESSION['user_id'];
-
 if (isset($_GET['delete'])) {
     $delete_id = intval($_GET['delete']);
-
     $del_stmt = $conn->prepare("
         DELETE FROM target_buffer
         WHERE id = ? AND user_id = ?
@@ -33,10 +27,8 @@ if (isset($_GET['delete'])) {
         $del_stmt->close();
     }
 }
-
 if (isset($_GET['delete_target'])) {
     $delete_target_id = intval($_GET['delete_target']);
-
     $del_t_stmt = $conn->prepare("
         DELETE FROM targets
         WHERE id = ? AND user_id = ?
@@ -51,7 +43,6 @@ if (isset($_GET['delete_target'])) {
         $del_t_stmt->close();
     }
 }
-
 $stmt = $conn->prepare("SELECT name, total_donated FROM userdata WHERE id = ?");
 if (!$stmt) {
     die("Prepare failed: " . $conn->error);
@@ -61,11 +52,9 @@ $stmt->execute();
 $result = $stmt->get_result();
 $user = $result->fetch_assoc();
 $stmt->close();
-
 $user_name_db = isset($user['name']) ? $user['name'] : 'User';
 $total_donated = isset($user['total_donated']) ? (float)$user['total_donated'] : 0.00;
 $user_name = isset($_SESSION['user_name']) ? $_SESSION['user_name'] : $user_name_db;
-
 $stmt_targets = $conn->prepare("SELECT * FROM targets WHERE user_id = ? ORDER BY created_at DESC");
 if (!$stmt_targets) {
     die("Prepare failed: " . $conn->error);
@@ -73,10 +62,8 @@ if (!$stmt_targets) {
 $stmt_targets->bind_param("i", $user_id);
 $stmt_targets->execute();
 $result_targets = $stmt_targets->get_result();
-
 $upcoming_targets = [];
 $completed_targets = [];
-
 while ($row = $result_targets->fetch_assoc()) {
     if (isset($row['status']) && $row['status'] !== 'pending') {
         $completed_targets[] = $row;
@@ -84,10 +71,8 @@ while ($row = $result_targets->fetch_assoc()) {
         $upcoming_targets[] = $row;
     }
 }
-
 $active_targets_count = count($upcoming_targets);
 $completed_targets_count = count($completed_targets);
-
 $stmt_targets->close();
 ?>
 <!DOCTYPE html>
@@ -179,57 +164,66 @@ $stmt_targets->close();
             .left-visual { display: none; }
             .right-content { margin-left: 0; width: 100%; padding: 120px 20px 40px; }
         }
+        .qr-code-display {
+            display: none;
+            margin-top: 5px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            width: 100%;
+            height: auto;
+            padding: 10px;
+            background: #fff;
+            text-align: center;
+        }
+        .qr-code-display img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
     </style>
 </head>
 <body>
-
     <header>
         <h1>StudyStake</h1>
         <a href="logout.php">Log Out</a>
     </header>
-
     <div class="left-visual">
         <div class="dashboard">
             <h2>User Dashboard</h2>
-
             <?php
             if (!isset($_SESSION['user_id'])) {
                 echo "Session user_id not set.";
                 exit();
             }
             ?>
-
             <div class="user-info">
                 <img src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png" alt="Profile Picture">
                 <div class="username">Welcome, <?php echo htmlspecialchars($user_name); ?>!</div>
             </div>
-
             <div class="info">
                 <label for="current-targets">Current Targets</label>
                 <div class="value" id="current-targets">
                     <?php echo $active_targets_count; ?> Active Targets
                 </div>
             </div>
-
             <div class="info">
                 <label for="completed-targets">Completed Targets</label>
                 <div class="value" id="completed-targets">
                     <?php echo $completed_targets_count; ?> Completed Targets
                 </div>
             </div>
-
             <div class="info">
                 <label for="total-donated">Total Money Donated</label>
                 <div class="value" id="total-donated">
                     <?php echo "₱" . number_format($total_donated, 2); ?>
                 </div>
             </div>
-
             <div class="info">
                 <label for="last-achievement">Last Achievement</label>
                 <div class="value" id="last-achievement">Achieved target in Math 101: 90%</div> 
             </div>
-
             <h3>Upcoming Targets</h3>
             <div class="target-section <?php echo empty($upcoming_targets) ? 'empty' : ''; ?>">
                 <?php if (empty($upcoming_targets)): ?>
@@ -248,7 +242,6 @@ $stmt_targets->close();
                     </ul>
                 <?php endif; ?>
             </div>
-
             <h3>Completed Targets</h3>
             <div class="target-section <?php echo empty($completed_targets) ? 'empty' : ''; ?>">
                 <?php if (empty($completed_targets)): ?>
@@ -272,26 +265,22 @@ $stmt_targets->close();
             </div>
         </div>
     </div>
-
     <div class="right-content">
         <div class="container">
             <h2>Set a New Target</h2>
-            <form action="save_target.php" method="POST">
+            <form action="save_target.php" method="POST" enctype="multipart/form-data">
                 <div>
                     <label for="subject">Subject Code</label>
                     <input type="text" id="subject" name="subject" placeholder="e.g., Math 101" required>
                 </div>
-
                 <div>
                     <label for="target">Target Grade (%)</label>
                     <input type="number" id="target" name="target" placeholder="e.g., 90" min="50" max="100" required>
                 </div>
-
                 <div>
                     <label for="bet">Bet Amount (₱)</label>
                     <input type="number" id="bet" name="bet" placeholder="e.g., 500" min="100" required>
                 </div>
-
                 <div>
                     <label for="charity">Choose a Charity (if goal not met)</label>
                     <select id="charity" name="charity" required>
@@ -302,30 +291,30 @@ $stmt_targets->close();
                         <option value="tahanan">Tahanan ng Pagmamahal</option>
                     </select>
                 </div>
-
                 <div>
                     <label for="method">Payment Method</label>
-                    <select id="method" name="method" required>
+                    <select id="method" name="method" required onchange="displayQRCode(this.value)">
                         <option value="">-- Select Payment Method --</option>
                         <option value="gcash">GCash</option>
                         <option value="maya">Maya</option>
                         <option value="paypal">PayPal</option>
-                        <option value="card">Credit / Debit Card</option>
+                        <option value="bdo">BDO</option>
+                        <option value="bpi">BPI</option>
                     </select>
                 </div>
-
+                <div id="qr-code-container" class="qr-code-display">
+                    <img id="qr-code-image" src="" alt="QR Code" />
+                </div>
                 <div>
                     <label>Upload Proof of Payment</label>
                     <input type="file" name="receipt" accept="image/*" required>
                 </div>
-
                 <button type="submit">Save Target</button>
             </form>
         </div>
-
         <div class="container">
             <h2>Mark a Target as Complete</h2>
-            <form id="complete-target-form" method="POST">
+            <form id="complete-target-form" method="POST" enctype="multipart/form-data">
                 <div>
                     <label for="active-target">Select Active Target</label>
                     <select id="active-target" name="target_id" required>
@@ -337,21 +326,17 @@ $stmt_targets->close();
                         <?php endforeach; ?>
                     </select>
                 </div>
-
                 <div>
                     <label for="achieved-grade">Enter Achieved Grade</label>
                     <input type="number" id="achieved-grade" name="achieved_grade" placeholder="e.g., 85" min="0" max="100" required>
                 </div>
-                
                 <div>
                     <label>Upload image of grades</label>
                     <input type="file" name="grade_proof" accept="image/*" required>
                 </div>
-
                 <button type="submit">Submit</button>
             </form>
         </div>
-
         <div class="charity-details">
             <h3>Learn About the Charities</h3>
             <div class="charity-item">
@@ -372,29 +357,23 @@ $stmt_targets->close();
             </div>
         </div>
     </div>
-
     <?php
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['target_id'], $_POST['achieved_grade'])) {
         $target_id = (int) $_POST['target_id'];
         $achieved_grade = (int) $_POST['achieved_grade'];
-
         $stmt = $conn->prepare("SELECT target_grade, bet_amount, charity FROM targets WHERE id = ? AND user_id = ? AND status = 'pending'");
         $stmt->bind_param("ii", $target_id, $user_id);
         $stmt->execute();
         $result = $stmt->get_result();
-
         if ($result->num_rows > 0) {
             $target = $result->fetch_assoc();
             $target_grade = (int) $target['target_grade'];
             $bet_amount = (float) $target['bet_amount'];
             $charity = $target['charity'];
-
             $status = ($achieved_grade >= $target_grade) ? 'completed' : 'failed';
             $result_text = ($achieved_grade >= $target_grade) ? 'met' : 'not met';
-
             $update_target_stmt = $conn->prepare("UPDATE targets SET status = ?, achieved_grade = ?, result = ?, date_completed = NOW() WHERE id = ? AND user_id = ?");
             $update_target_stmt->bind_param("ssiii", $status, $achieved_grade, $result_text, $target_id, $user_id);
-            
             if (!$update_target_stmt->execute()) {
                 error_log("Target Update Failed: " . $update_target_stmt->error);
                 echo "<script>alert('Error: Could not update target record. " . addslashes($update_target_stmt->error) . "');</script>";
@@ -402,26 +381,38 @@ $stmt_targets->close();
                 if ($status === 'failed') {
                     $update_donation_stmt = $conn->prepare("UPDATE userdata SET total_donated = total_donated + ? WHERE id = ?");
                     $update_donation_stmt->bind_param("di", $bet_amount, $user_id);
-
                     if (!$update_donation_stmt->execute()) {
                         error_log("Donation Update Failed: " . $update_donation_stmt->error);
                         echo "<script>alert('Warning: Target failed, but donation update failed. " . addslashes($update_donation_stmt->error) . "');</script>";
                     }
                     $update_donation_stmt->close();
                 }
-                
                 header("Location: dashboard.php?msg=target_processed&status=" . $status);
                 exit();
             }
-
             $update_target_stmt->close();
         } else {
              echo "<script>alert('Error: Target not found or already processed.');</script>";
         }
-
         $stmt->close();
     }
     ?>
-
+    <script>
+        function displayQRCode(paymentMethod) {
+            const qrContainer = document.getElementById('qr-code-container');
+            const qrImage = document.getElementById('qr-code-image');
+            
+            if (paymentMethod && paymentMethod !== '') {
+                const imagePath = `qrcodes/${paymentMethod}.png`;
+                qrImage.src = imagePath;
+                qrImage.alt = `${paymentMethod.toUpperCase()} QR Code`;
+                qrContainer.style.display = 'block';
+            } else {
+                qrContainer.style.display = 'none';
+                qrImage.src = '';
+                qrImage.alt = 'QR Code';
+            }
+        }
+    </script>
 </body>
 </html>
